@@ -396,6 +396,14 @@ function bindEvents() {
             }
         });
     });
+    
+    // Profile Events
+    document.getElementById('menuProfile')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeUserDropdown();
+        openProfile();
+    });
+    document.getElementById('btnCloseProfile')?.addEventListener('click', () => closeModal('profileModal'));
 }
 
 // ============================================
@@ -533,6 +541,7 @@ function handleRegister() {
 // SCANNER FUNCTIONS
 // ============================================
 let html5QrCode = null;
+let cameraAvailable = false;
 
 function openScanner() {
     if (!AppState.currentUser) {
@@ -541,7 +550,13 @@ function openScanner() {
     }
     
     showModal('scannerModal');
-    startQRScanner();
+    
+    // Always show manual input first (for best UX on all devices)
+    const manualInput = document.getElementById('manualInput');
+    if (manualInput) manualInput.style.display = 'block';
+    
+    // Try to start camera as bonus feature
+    tryStartCamera();
 }
 
 function closeScanner() {
@@ -549,29 +564,69 @@ function closeScanner() {
     stopQRScanner();
 }
 
-function startQRScanner() {
+async function tryStartCamera() {
     const qrReader = document.getElementById('qrReader');
     const status = document.getElementById('scannerStatus');
-    const manualInput = document.getElementById('manualInput');
     
-    if (!qrReader) return;
+    // Check if camera is supported
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showCameraNotAvailable('เบราว์เซอร์ไม่รองรับกล้อง');
+        return;
+    }
     
-    if (typeof Html5Qrcode !== 'undefined') {
-        html5QrCode = new Html5Qrcode("qrReader");
-        
-        html5QrCode.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 220, height: 220 } },
-            (decodedText) => handleQRScan(decodedText),
-            () => {}
-        ).then(() => {
-            if (status) status.textContent = 'กล้องพร้อม - หันไปที่ QR Code';
-            if (manualInput) manualInput.style.display = 'none';
-        }).catch(() => {
-            showCameraFallback();
+    // Check HTTPS (required for camera on iOS)
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        showCameraNotAvailable('ต้องใช้ HTTPS สำหรับกล้อง');
+        return;
+    }
+    
+    if (status) status.textContent = 'กำลังขอสิทธิ์กล้อง...';
+    
+    // Try to check camera permission first
+    try {
+        // Request camera permission
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' }
         });
-    } else {
-        showCameraFallback();
+        
+        // Stop the test stream
+        stream.getTracks().forEach(track => track.stop());
+        
+        // Camera works! Now start QR scanner
+        if (typeof Html5Qrcode !== 'undefined') {
+            html5QrCode = new Html5Qrcode("qrReader");
+            
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { 
+                    fps: 10, 
+                    qrbox: { width: 200, height: 200 },
+                    aspectRatio: 1
+                },
+                (decodedText) => handleQRScan(decodedText),
+                () => {} // Ignore errors during scanning
+            ).then(() => {
+                cameraAvailable = true;
+                if (status) {
+                    status.textContent = '📸 กล้องพร้อม - หันไปที่ QR Code';
+                    status.style.color = '#10b981';
+                }
+            }).catch((err) => {
+                console.log('QR Scanner error:', err);
+                showCameraNotAvailable('ไม่สามารถเริ่มกล้องได้');
+            });
+        } else {
+            showCameraNotAvailable('ไม่พบ QR Scanner Library');
+        }
+    } catch (err) {
+        console.log('Camera permission denied:', err);
+        if (err.name === 'NotAllowedError') {
+            showCameraNotAvailable('ไม่ได้รับอนุญาตใช้กล้อง');
+        } else if (err.name === 'NotFoundError') {
+            showCameraNotAvailable('ไม่พบกล้อง');
+        } else {
+            showCameraNotAvailable('กล้องไม่พร้อมใช้งาน');
+        }
     }
 }
 
@@ -580,26 +635,26 @@ function stopQRScanner() {
         html5QrCode.stop().catch(() => {});
         html5QrCode = null;
     }
+    cameraAvailable = false;
 }
 
-function showCameraFallback() {
+function showCameraNotAvailable(reason) {
     const qrReader = document.getElementById('qrReader');
     const status = document.getElementById('scannerStatus');
-    const manualInput = document.getElementById('manualInput');
     
     if (qrReader) {
         qrReader.innerHTML = `
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:20px;text-align:center;">
-                <div style="font-size:3rem;margin-bottom:16px;">📷</div>
-                <p style="color:#94a3b8;font-size:0.875rem;">ไม่สามารถเปิดกล้องได้</p>
+            <div class="camera-unavailable">
+                <div class="camera-icon">📷</div>
+                <p class="camera-reason">${reason}</p>
+                <p class="camera-hint">กรุณาเลือกประเภทถังด้านล่าง</p>
             </div>
         `;
     }
+    
     if (status) {
-        status.textContent = 'กรุณาใช้ตัวเลือกด้านล่าง';
-        status.style.color = '#f97316';
+        status.textContent = '';
     }
-    if (manualInput) manualInput.style.display = 'block';
 }
 
 function handleQRScan(qrData) {
@@ -622,14 +677,95 @@ function handleQRScan(qrData) {
     processTransaction(binInfo.type, binInfo.points);
 }
 
-function handleManualSubmit() {
-    const binType = document.getElementById('manualBinType')?.value || 'general';
-    const points = { general: 10, recycle: 20, hazardous: 30 }[binType];
-    closeScanner();
-    processTransaction(binType, points);
+// Bin lookup storage
+let currentBinLookup = null;
+
+function lookupBinCode() {
+    const binCode = document.getElementById('manualBinCode')?.value.trim().toUpperCase();
+    const preview = document.getElementById('binPreview');
+    const status = document.getElementById('binStatus');
+    const submitBtn = document.getElementById('btnManualSubmit');
+    
+    // Reset
+    currentBinLookup = null;
+    if (preview) preview.style.display = 'none';
+    if (status) status.innerHTML = '';
+    if (submitBtn) submitBtn.disabled = true;
+    
+    if (!binCode || binCode.length < 3) {
+        return;
+    }
+    
+    // Get bins from storage
+    const binsData = localStorage.getItem('s2eBins');
+    const bins = binsData ? JSON.parse(binsData) : [];
+    
+    // Find bin by code
+    const bin = bins.find(b => b.id === binCode);
+    
+    const binTypes = {
+        general: { name: 'ถังทั่วไป', icon: '🗑️', points: 10 },
+        recycle: { name: 'ถังรีไซเคิล', icon: '♻️', points: 20 },
+        hazardous: { name: 'ถังอันตราย', icon: '☢️', points: 30 }
+    };
+    
+    if (bin && bin.active !== false) {
+        // Found in database
+        const typeInfo = binTypes[bin.type] || binTypes.general;
+        currentBinLookup = { ...bin, ...typeInfo };
+        
+        if (preview) {
+            preview.style.display = 'flex';
+            document.getElementById('binPreviewIcon').textContent = typeInfo.icon;
+            document.getElementById('binPreviewType').textContent = typeInfo.name;
+            document.getElementById('binPreviewLocation').textContent = bin.location || '-';
+            document.getElementById('binPreviewPoints').textContent = '+' + typeInfo.points;
+        }
+        
+        if (status) {
+            status.innerHTML = '<span class="status-success">✅ พบถังในระบบ</span>';
+        }
+        
+        if (submitBtn) submitBtn.disabled = false;
+    } else {
+        // Not found
+        if (status) {
+            status.innerHTML = '<span class="status-error">❌ ไม่พบรหัส "' + binCode + '" ในระบบ</span>';
+        }
+        if (submitBtn) submitBtn.disabled = true;
+    }
 }
 
-function processTransaction(type, points) {
+function handleManualSubmit() {
+    if (!currentBinLookup) {
+        const binCode = document.getElementById('manualBinCode')?.value.trim().toUpperCase();
+        if (!binCode) {
+            showBinStatus('❌ กรุณากรอกรหัสถังขยะ', 'error');
+            return;
+        }
+        showBinStatus('❌ ไม่พบรหัส "' + binCode + '" ในระบบ', 'error');
+        return;
+    }
+    
+    const binCode = currentBinLookup.id;
+    const binType = currentBinLookup.type || 'general';
+    const points = currentBinLookup.points || 10;
+    
+    closeScanner();
+    document.getElementById('manualBinCode').value = '';
+    currentBinLookup = null;
+    
+    processTransaction(binType, points, binCode);
+}
+
+function showBinStatus(message, type) {
+    const status = document.getElementById('binStatus');
+    if (status) {
+        status.innerHTML = `<span class="status-${type}">${message}</span>`;
+    }
+}
+
+function processTransaction(type, points, binCode = null) {
     if (!AppState.currentUser) return;
     
     // Update user points
@@ -641,6 +777,7 @@ function processTransaction(type, points) {
             id: Date.now(),
             type,
             points,
+            binCode: binCode || 'QR-SCAN',
             timestamp: new Date().toISOString(),
             icon: { general: '🗑️', recycle: '♻️', hazardous: '☢️' }[type],
             typeName: { general: 'ถังทั่วไป', recycle: 'ถังรีไซเคิล', hazardous: 'ถังอันตราย' }[type]
@@ -720,5 +857,24 @@ function formatTime(timestamp) {
     return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
 }
 
+// ============================================
+// PROFILE
+// ============================================
+function openProfile() {
+    if (!AppState.currentUser) return;
+    
+    const user = AppState.currentUser;
+    
+    // Fill profile data
+    document.getElementById('profileAvatar').textContent = user.fullName?.charAt(0).toUpperCase() || 'U';
+    document.getElementById('profileUsername').textContent = '@' + user.username;
+    document.getElementById('profileEmailDisplay').textContent = user.email;
+    document.getElementById('profilePoints').textContent = user.points || 0;
+    document.getElementById('profileScans').textContent = user.transactions?.length || 0;
+    
+    showModal('profileModal');
+}
+
 // Initialize on DOM Ready
 document.addEventListener('DOMContentLoaded', init);
+

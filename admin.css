@@ -8,20 +8,29 @@
     min-height: 100vh;
     max-width: 100%;
     background: var(--bg-primary);
+    padding: var(--space-3);
+    gap: var(--space-3);
 }
 
 /* ============================================
-   SIDEBAR
+   SIDEBAR (Modern Rounded Design)
    ============================================ */
 .sidebar {
     width: 260px;
-    background: var(--bg-secondary);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-xl);
     display: flex;
     flex-direction: column;
     position: fixed;
-    height: 100vh;
+    height: calc(100vh - var(--space-6));
     z-index: 100;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    overflow: hidden;
 }
 
 .sidebar-header {
@@ -29,6 +38,7 @@
     align-items: center;
     gap: var(--space-2);
     padding: var(--space-5);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -36,11 +46,12 @@
     background: var(--gradient-primary);
     color: white;
     font-size: 0.625rem;
-    padding: 2px 8px;
+    padding: 3px 10px;
     border-radius: var(--radius-full);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 .sidebar-nav {
@@ -48,7 +59,8 @@
     padding: var(--space-4);
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-1);
+    overflow-y: auto;
 }
 
 .nav-link {
@@ -58,28 +70,55 @@
     padding: var(--space-3) var(--space-4);
     color: var(--text-secondary);
     text-decoration: none;
-    border-radius: var(--radius-md);
-    transition: all var(--transition-fast);
+    border-radius: var(--radius-lg);
+    transition: all 0.2s ease;
     font-size: 0.875rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--gradient-primary);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
 }
 
 .nav-link:hover {
-    background: var(--bg-glass);
+    background: rgba(255, 255, 255, 0.05);
     color: var(--text-primary);
+    transform: translateX(4px);
 }
 
 .nav-link.active {
-    background: rgba(16, 185, 129, 0.15);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
     color: var(--primary-400);
+    box-shadow: 0 2px 12px rgba(16, 185, 129, 0.15);
+}
+
+.nav-link.active::before {
+    transform: scaleY(1);
 }
 
 .nav-link .nav-icon {
-    font-size: 1.125rem;
+    font-size: 1.25rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .sidebar-footer {
     padding: var(--space-4);
     border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.2) 100%);
+}
+
+.sidebar-footer .nav-link {
+    margin-bottom: var(--space-2);
 }
 
 /* ============================================
@@ -87,9 +126,12 @@
    ============================================ */
 .admin-main {
     flex: 1;
-    margin-left: 260px;
-    padding: var(--space-6);
-    min-height: 100vh;
+    margin-left: calc(260px + var(--space-3));
+    padding: var(--space-5);
+    min-height: calc(100vh - var(--space-6));
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 /* Admin Header */

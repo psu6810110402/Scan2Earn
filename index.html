@@ -367,10 +367,36 @@
         </div>
         <div class="dropdown-divider"></div>
         <a href="#" class="dropdown-item" id="menuProfile">👤 โปรไฟล์</a>
-        <a href="#" class="dropdown-item" id="menuSettings">⚙️ ตั้งค่า</a>
         <a href="admin.html" class="dropdown-item admin-only" id="menuAdmin" style="display: none;">🔧 Admin Panel</a>
         <div class="dropdown-divider"></div>
         <a href="#" class="dropdown-item logout" id="menuLogout">🚪 ออกจากระบบ</a>
+    </div>
+
+    <!-- Profile Modal (Simple View) -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content profile-modal-simple">
+            <div class="modal-header">
+                <h2>👤 โปรไฟล์</h2>
+                <button class="btn-close" id="btnCloseProfile">&times;</button>
+            </div>
+            <div class="profile-simple-content">
+                <div class="profile-avatar" id="profileAvatar">U</div>
+                <div class="profile-info">
+                    <div class="profile-username" id="profileUsername">username</div>
+                    <div class="profile-email" id="profileEmailDisplay">email@example.com</div>
+                </div>
+                <div class="profile-stats-simple">
+                    <div class="profile-stat-item">
+                        <span class="stat-value" id="profilePoints">0</span>
+                        <span class="stat-label">💎 แต้ม</span>
+                    </div>
+                    <div class="profile-stat-item">
+                        <span class="stat-value" id="profileScans">0</span>
+                        <span class="stat-label">� สแกน</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Scanner Modal -->
@@ -395,17 +421,28 @@
                 <p class="scanner-status" id="scannerStatus">กำลังเปิดกล้อง...</p>
             </div>
             
-            <!-- Manual Input (Fallback) -->
-            <div class="manual-input" id="manualInput" style="display: none;">
-                <p class="manual-label">📝 หรือเลือกประเภทถังขยะ:</p>
+            <!-- Manual Input (Always visible) -->
+            <div class="manual-input" id="manualInput">
+                <p class="manual-label">📝 กรอกรหัสถังขยะ:</p>
                 <div class="manual-form">
-                    <select id="manualBinType" class="manual-select">
-                        <option value="general">🗑️ ถังทั่วไป (+10)</option>
-                        <option value="recycle">♻️ รีไซเคิล (+20)</option>
-                        <option value="hazardous">☢️ อันตราย (+30)</option>
-                    </select>
+                    <input type="text" id="manualBinCode" class="manual-input-field" placeholder="เช่น GEN-001, REC-001" oninput="lookupBinCode()">
                     <button class="btn-manual-submit" id="btnManualSubmit">ยืนยัน</button>
                 </div>
+                
+                <!-- Bin Info Preview -->
+                <div class="bin-preview" id="binPreview" style="display: none;">
+                    <div class="bin-preview-icon" id="binPreviewIcon">🗑️</div>
+                    <div class="bin-preview-info">
+                        <div class="bin-preview-type" id="binPreviewType">ถังทั่วไป</div>
+                        <div class="bin-preview-location" id="binPreviewLocation">-</div>
+                    </div>
+                    <div class="bin-preview-points" id="binPreviewPoints">+10</div>
+                </div>
+                
+                <!-- Status Message -->
+                <div class="bin-status" id="binStatus"></div>
+                
+                <p class="manual-hint">รหัสอยู่บนถังขยะหรือป้ายข้างถัง</p>
             </div>
         </div>
     </div>

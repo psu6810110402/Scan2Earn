@@ -893,18 +893,24 @@ body {
    ============================================ */
 .bottom-nav {
   position: fixed;
-  bottom: 0;
+  bottom: var(--space-4);
   left: 50%;
   transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
+  width: calc(100% - var(--space-8));
+  max-width: 420px;
   display: flex;
   justify-content: space-around;
   padding: var(--space-3) var(--space-5);
-  background: rgba(10, 15, 13, 0.95);
+  background: linear-gradient(180deg, rgba(20, 30, 25, 0.95) 0%, rgba(10, 15, 13, 0.98) 100%);
   backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
   z-index: 100;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 -4px 24px rgba(16, 185, 129, 0.1);
 }
 
 .nav-item {
@@ -2172,3 +2178,231 @@ body {
         width: 200px;
     }
 }
+
+/* ============================================
+   MANUAL BIN INPUT
+   ============================================ */
+.manual-input {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.manual-label {
+    text-align: center;
+    margin-bottom: var(--space-3);
+    font-weight: 500;
+}
+
+.manual-form {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.manual-input-field {
+    flex: 1;
+    padding: var(--space-3);
+    background: var(--bg-glass);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-family: var(--font-thai);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.manual-input-field::placeholder {
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text-muted);
+}
+
+.manual-input-field:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.btn-manual-submit {
+    padding: var(--space-3) var(--space-5);
+    background: var(--gradient-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-manual-submit:hover:not(:disabled) {
+    transform: scale(1.02);
+}
+
+.btn-manual-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.manual-hint {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-top: var(--space-2);
+}
+
+/* Bin Preview Card */
+.bin-preview {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    margin-top: var(--space-3);
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: var(--radius-md);
+}
+
+.bin-preview-icon {
+    font-size: 2rem;
+}
+
+.bin-preview-info {
+    flex: 1;
+}
+
+.bin-preview-type {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.bin-preview-location {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.bin-preview-points {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-400);
+}
+
+/* Status Messages */
+.bin-status {
+    text-align: center;
+    margin-top: var(--space-3);
+    font-size: 0.875rem;
+}
+
+.status-success {
+    color: var(--primary-400);
+}
+
+.status-error {
+    color: var(--accent-red);
+}
+
+/* Camera Unavailable */
+.camera-unavailable {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: var(--space-5);
+    text-align: center;
+}
+
+.camera-icon {
+    font-size: 3rem;
+    margin-bottom: var(--space-3);
+    opacity: 0.5;
+}
+
+.camera-reason {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin-bottom: var(--space-2);
+}
+
+.camera-hint {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+/* ============================================
+   PROFILE MODAL (Simple)
+   ============================================ */
+.profile-modal-simple {
+    max-width: 340px;
+    text-align: center;
+}
+
+.profile-simple-content {
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.profile-username {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.profile-email {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.profile-stats-simple {
+    display: flex;
+    gap: var(--space-6);
+    padding: var(--space-4);
+    background: var(--bg-glass);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    justify-content: center;
+}
+
+.profile-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.profile-stat-item .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-400);
+}
+
+.profile-stat-item .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+
