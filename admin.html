@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Scan to Earn 🌿</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <span class="brand-icon">🌿</span>
+                <span class="brand-text">Scan<span class="highlight">2</span>Earn</span>
+                <span class="admin-badge">Admin</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-link active" data-section="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-link" data-section="bins">
+                    <span class="nav-icon">🗑️</span>
+                    <span>จัดการถังขยะ</span>
+                </a>
+                <a href="#" class="nav-link" data-section="qrcode">
+                    <span class="nav-icon">📱</span>
+                    <span>สร้าง QR Code</span>
+                </a>
+                <a href="#" class="nav-link" data-section="users">
+                    <span class="nav-icon">👥</span>
+                    <span>ผู้ใช้งาน</span>
+                </a>
+                <a href="#" class="nav-link" data-section="admins">
+                    <span class="nav-icon">🔐</span>
+                    <span>จัดการแอดมิน</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon">🏠</span>
+                    <span>ไปหน้า User</span>
+                </a>
+                <a href="#" class="nav-link logout" id="adminLogout">
+                    <span class="nav-icon">🚪</span>
+                    <span>ออกจากระบบ</span>
+                </a>
+            </div>
+        </aside>
+        
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1 class="page-title" id="pageTitle">📊 Dashboard</h1>
+                <div class="header-actions">
+                    <div class="date-filter">
+                        <select id="dateFilter" class="filter-select">
+                            <option value="today">วันนี้</option>
+                            <option value="week">สัปดาห์นี้</option>
+                            <option value="month" selected>เดือนนี้</option>
+                            <option value="year">ปีนี้</option>
+                            <option value="all">ทั้งหมด</option>
+                        </select>
+                    </div>
+                    <button class="theme-toggle" id="adminThemeToggle" title="เปลี่ยนธีม">
+                        <span id="adminThemeIcon">🌙</span>
+                    </button>
+                    <div class="admin-user">
+                        <span class="admin-name" id="adminName">Admin</span>
+                        <div class="admin-avatar">👨‍💼</div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Dashboard Section -->
+            <section class="admin-section active" id="dashboardSection">
+                <div class="stats-overview">
+                    <div class="overview-card">
+                        <div class="card-icon blue">👥</div>
+                        <div class="card-content">
+                            <span class="card-value" id="statUsers">0</span>
+                            <span class="card-label">ผู้ใช้งานทั้งหมด</span>
+                        </div>
+                    </div>
+                    <div class="overview-card">
+                        <div class="card-icon green">🗑️</div>
+                        <div class="card-content">
+                            <span class="card-value" id="statBins">0</span>
+                            <span class="card-label">ถังขยะ Active</span>
+                        </div>
+                    </div>
+                    <div class="overview-card">
+                        <div class="card-icon gold">💎</div>
+                        <div class="card-content">
+                            <span class="card-value" id="statPoints">0</span>
+                            <span class="card-label">แต้มที่แจกไป</span>
+                        </div>
+                    </div>
+                    <div class="overview-card">
+                        <div class="card-icon purple">📷</div>
+                        <div class="card-content">
+                            <span class="card-value" id="statScans">0</span>
+                            <span class="card-label">การสแกนทั้งหมด</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <h3>📈 สถิติการสแกน (7 วันล่าสุด)</h3>
+                        <div class="bar-chart" id="scanChart"></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>🥧 ประเภทขยะที่ทิ้ง</h3>
+                        <div class="pie-chart">
+                            <div class="pie-item">
+                                <span class="pie-icon">🗑️</span>
+                                <div class="pie-info">
+                                    <span class="pie-label">ถังทั่วไป</span>
+                                    <div class="pie-bar"><div class="pie-fill general" id="generalBar"></div></div>
+                                    <span class="pie-percent" id="generalPercent">0%</span>
+                                </div>
+                            </div>
+                            <div class="pie-item">
+                                <span class="pie-icon">♻️</span>
+                                <div class="pie-info">
+                                    <span class="pie-label">รีไซเคิล</span>
+                                    <div class="pie-bar"><div class="pie-fill recycle" id="recycleBar"></div></div>
+                                    <span class="pie-percent" id="recyclePercent">0%</span>
+                                </div>
+                            </div>
+                            <div class="pie-item">
+                                <span class="pie-icon">☢️</span>
+                                <div class="pie-info">
+                                    <span class="pie-label">อันตราย</span>
+                                    <div class="pie-bar"><div class="pie-fill hazard" id="hazardBar"></div></div>
+                                    <span class="pie-percent" id="hazardPercent">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="activity-card">
+                    <h3>🕐 กิจกรรมล่าสุด</h3>
+                    <div class="activity-list" id="activityList">
+                        <div class="empty-activity"><span>📭</span><p>ยังไม่มีกิจกรรม</p></div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Bins Section -->
+            <section class="admin-section" id="binsSection">
+                <div class="section-actions">
+                    <button class="btn-add" id="btnAddBin"><span>➕</span> เพิ่มถังขยะ</button>
+                </div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>รหัสถัง</th>
+                                <th>ประเภท</th>
+                                <th>คะแนน</th>
+                                <th>สถานที่</th>
+                                <th>สถานะ</th>
+                                <th>จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="binsTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- QR Code Section -->
+            <section class="admin-section" id="qrcodeSection">
+                <div class="qr-generator">
+                    <div class="qr-form-card">
+                        <h3>� สร้าง QR Code</h3>
+                        
+                        <div class="form-group">
+                            <label>เลือกถังขยะ <span class="required">*</span></label>
+                            <select id="qrBinSelect" class="form-input">
+                                <option value="">-- เลือกถังขยะ --</option>
+                            </select>
+                        </div>
+                        
+                        <div class="qr-bin-info" id="qrBinInfo" style="display:none;">
+                            <div class="info-row"><span>รหัส:</span> <strong id="qrSelectedCode">-</strong></div>
+                            <div class="info-row"><span>ประเภท:</span> <strong id="qrSelectedType">-</strong></div>
+                            <div class="info-row"><span>แต้ม:</span> <strong id="qrSelectedPoints">-</strong></div>
+                            <div class="info-row"><span>สถานที่:</span> <strong id="qrSelectedLocation">-</strong></div>
+                        </div>
+                        
+                        <button class="btn-primary" id="btnGenerateQR" disabled>📱 สร้าง QR Code</button>
+                        
+                        <div class="or-divider"><span>หรือ</span></div>
+                        
+                        <button class="btn-secondary" id="btnAddNewBinForQR">➕ เพิ่มถังใหม่แล้วสร้าง QR</button>
+                    </div>
+                    
+                    <div class="qr-preview-card">
+                        <h3>👁️ QR Code พร้อมใช้</h3>
+                        <div class="qr-display" id="qrDisplay">
+                            <p class="qr-placeholder">เลือกถังขยะแล้วกด "สร้าง QR Code"</p>
+                        </div>
+                        <button class="btn-download" id="btnDownloadQR" style="display:none;">⬇️ ดาวน์โหลด PNG</button>
+                    </div>
+                </div>
+                
+                <div class="saved-section">
+                    <h3>📋 QR Code ที่สร้างไว้</h3>
+                    <div class="saved-qr-grid" id="savedQRGrid"></div>
+                </div>
+            </section>
+            
+            <!-- Users Section -->
+            <section class="admin-section" id="usersSection">
+                <div class="section-header-bar">
+                    <h3>👥 รายชื่อผู้ใช้งานทั้งหมด</h3>
+                    <div class="search-box">
+                        <input type="text" id="userSearch" placeholder="🔍 ค้นหาผู้ใช้..." class="form-input">
+                    </div>
+                </div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>ชื่อ</th>
+                                <th>แต้ม</th>
+                                <th>สมัครเมื่อ</th>
+                                <th>จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- Admins Section -->
+            <section class="admin-section" id="adminsSection">
+                <div class="section-actions">
+                    <button class="btn-add" id="btnAddAdmin"><span>➕</span> เพิ่มแอดมิน</button>
+                </div>
+                <div class="admin-info-note" id="adminNote"></div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>ชื่อ</th>
+                                <th>Role</th>
+                                <th>จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminsTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- MODALS -->
+    <!-- Add Bin Modal -->
+    <div class="modal" id="addBinModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ เพิ่มถังขยะ</h2>
+                <button class="btn-close" onclick="closeModal('addBinModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>รหัสถัง <span class="required">*</span></label>
+                    <input type="text" id="newBinCode" class="form-input" placeholder="GEN-003">
+                </div>
+                <div class="form-group">
+                    <label>ประเภท</label>
+                    <select id="newBinType" class="form-input">
+                        <option value="general">🗑️ ถังทั่วไป (10 แต้ม)</option>
+                        <option value="recycle">♻️ รีไซเคิล (20 แต้ม)</option>
+                        <option value="hazardous">☢️ อันตราย (30 แต้ม)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>สถานที่</label>
+                    <input type="text" id="newBinLocation" class="form-input" placeholder="อาคาร B ชั้น 2">
+                </div>
+                <button class="btn-primary" id="btnSaveBin">บันทึก</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- View/Edit User Modal -->
+    <div class="modal" id="userDetailModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2>👤 ข้อมูลผู้ใช้</h2>
+                <button class="btn-close" onclick="closeModal('userDetailModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="user-detail-grid">
+                    <div class="detail-item"><label>ID</label><span id="detailUserId">-</span></div>
+                    <div class="detail-item"><label>Username</label><input type="text" id="detailUsername" class="form-input" readonly></div>
+                    <div class="detail-item"><label>Email</label><input type="email" id="detailEmail" class="form-input"></div>
+                    <div class="detail-item"><label>ชื่อ-นามสกุล</label><input type="text" id="detailFullName" class="form-input"></div>
+                    <div class="detail-item"><label>Role</label><span id="detailRole" class="role-badge">-</span></div>
+                    <div class="detail-item"><label>แต้มสะสม</label><input type="number" id="detailPoints" class="form-input"></div>
+                    <div class="detail-item"><label>สมัครเมื่อ</label><span id="detailCreatedAt">-</span></div>
+                    <div class="detail-item"><label>Password (Hash)</label><span id="detailPasswordHash" class="password-hash">-</span></div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" onclick="openResetPasswordFromDetail()">🔑 รีเซ็ตรหัสผ่าน</button>
+                    <button class="btn-primary" id="btnSaveUserDetail">💾 บันทึก</button>
+                </div>
+                <input type="hidden" id="editingUserId">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reset Password Modal -->
+    <div class="modal" id="resetPasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔑 รีเซ็ตรหัสผ่าน</h2>
+                <button class="btn-close" onclick="closeModal('resetPasswordModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="reset-info">รีเซ็ตรหัสผ่านให้: <strong id="resetUserName">-</strong></p>
+                <div class="form-group">
+                    <label>รหัสผ่านใหม่ <span class="required">*</span></label>
+                    <input type="password" id="newPassword" class="form-input" placeholder="รหัสผ่านใหม่">
+                </div>
+                <div class="form-group">
+                    <label>ยืนยันรหัสผ่าน</label>
+                    <input type="password" id="confirmNewPassword" class="form-input" placeholder="ยืนยันรหัสผ่าน">
+                </div>
+                <input type="hidden" id="resetUserId">
+                <button class="btn-primary" id="btnConfirmResetPassword">รีเซ็ตรหัสผ่าน</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Admin Modal -->
+    <div class="modal" id="addAdminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ เพิ่มแอดมิน</h2>
+                <button class="btn-close" onclick="closeModal('addAdminModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Username <span class="required">*</span></label>
+                    <input type="text" id="newAdminUsername" class="form-input" placeholder="username">
+                </div>
+                <div class="form-group">
+                    <label>Email <span class="required">*</span></label>
+                    <input type="email" id="newAdminEmail" class="form-input" placeholder="admin@example.com">
+                </div>
+                <div class="form-group">
+                    <label>ชื่อ-นามสกุล <span class="required">*</span></label>
+                    <input type="text" id="newAdminName" class="form-input" placeholder="ชื่อจริง นามสกุล">
+                </div>
+                <div class="form-group">
+                    <label>รหัสผ่าน <span class="required">*</span></label>
+                    <input type="password" id="newAdminPassword" class="form-input" placeholder="รหัสผ่าน">
+                </div>
+                <button class="btn-primary" id="btnSaveAdmin">เพิ่มแอดมิน</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="config.js"></script>
+    <script src="supabase.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan to Earn | สแกนทิ้ง ได้แต้ม 🌿</title>
+    <meta name="description" content="ทิ้งขยะอย่างถูกวิธี รับแต้มสะสมแลกของรางวัล">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- QR Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <span class="brand-icon">🌿</span>
+                <span class="brand-text">Scan<span class="highlight">2</span>Earn</span>
+            </div>
+            <div class="nav-actions">
+                <!-- Theme Toggle -->
+                <button class="theme-toggle" id="themeToggle" title="เปลี่ยนธีม">
+                    <span class="theme-icon" id="themeIcon">🌙</span>
+                </button>
+                <!-- User Info (when logged in) -->
+                <div class="nav-user logged-in" id="navUserLoggedIn" style="display: none;">
+                    <div class="user-points">
+                        <span class="points-icon">💎</span>
+                        <span class="points-value" id="navPoints">0</span>
+                    </div>
+                    <button class="user-menu-btn" id="userMenuBtn">
+                        <span id="userInitial">U</span>
+                    </button>
+                </div>
+                <!-- Login Button (when not logged in) -->
+                <button class="btn-login" id="btnShowLogin">เข้าสู่ระบบ</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Hero Section -->
+            <section class="hero-section" id="heroSection">
+                <div class="hero-bg"></div>
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        <span class="title-line">ทิ้งขยะ</span>
+                        <span class="title-line gradient-text">ได้แต้ม</span>
+                    </h1>
+                    <p class="hero-subtitle">สแกน QR Code ที่ถังขยะ รับแต้มทันที!</p>
+                    
+                    <div class="points-preview">
+                        <div class="point-card">
+                            <span class="bin-icon">🗑️</span>
+                            <span class="bin-type">ถังทั่วไป</span>
+                            <span class="bin-points">+10</span>
+                        </div>
+                        <div class="point-card recycle">
+                            <span class="bin-icon">♻️</span>
+                            <span class="bin-type">รีไซเคิล</span>
+                            <span class="bin-points">+20</span>
+                        </div>
+                        <div class="point-card hazard">
+                            <span class="bin-icon">☢️</span>
+                            <span class="bin-type">อันตราย</span>
+                            <span class="bin-points">+30</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-scan" id="btnScan">
+                        <span class="scan-icon">📷</span>
+                        <span>สแกน QR Code</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Dashboard Section -->
+            <section class="dashboard-section" id="dashboardSection">
+                <div class="section-header">
+                    <h2>📊 แดชบอร์ดของคุณ</h2>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card points-card">
+                        <div class="stat-icon">💎</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="totalPointsDisplay">0</span>
+                            <span class="stat-label">แต้มสะสม</span>
+                        </div>
+                    </div>
+                    <div class="stat-card scans-card">
+                        <div class="stat-icon">📷</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="totalScans">0</span>
+                            <span class="stat-label">ครั้งที่สแกน</span>
+                        </div>
+                    </div>
+                    <div class="stat-card eco-card">
+                        <div class="stat-icon">🌍</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="ecoScore">0</span>
+                            <span class="stat-label">Eco Score</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction History -->
+                <div class="history-section">
+                    <div class="history-header">
+                        <h3>📜 ประวัติการทิ้งขยะ</h3>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <div class="empty-state">
+                            <span class="empty-icon">📭</span>
+                            <p>ยังไม่มีประวัติ</p>
+                            <p class="empty-hint">เริ่มสแกน QR Code เพื่อสะสมแต้ม!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- User Guide Section -->
+            <section class="guide-section" id="guideSection" style="display: none;">
+                <div class="section-header">
+                    <h2>📖 คู่มือการใช้งาน</h2>
+                </div>
+                
+                <div class="guide-cards">
+                    <div class="guide-card">
+                        <div class="guide-step">1</div>
+                        <div class="guide-content">
+                            <h4>เปิดแอปและกดสแกน</h4>
+                            <p>กดปุ่ม "สแกน QR Code" หรือไอคอนกล้องที่ด้านล่าง</p>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-card">
+                        <div class="guide-step">2</div>
+                        <div class="guide-content">
+                            <h4>หันกล้องไปที่ QR Code</h4>
+                            <p>ส่องกล้องไปที่ QR Code บนถังขยะ รอให้ระบบอ่านอัตโนมัติ</p>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-card">
+                        <div class="guide-step">3</div>
+                        <div class="guide-content">
+                            <h4>ทิ้งขยะลงถัง</h4>
+                            <p>ทิ้งขยะลงในถังตามประเภทที่ถูกต้อง</p>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-card">
+                        <div class="guide-step">4</div>
+                        <div class="guide-content">
+                            <h4>รับแต้มสะสม</h4>
+                            <p>แต้มจะเข้าบัญชีทันที! สะสมเพื่อแลกของรางวัล</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Point Info -->
+                <div class="point-info-card">
+                    <h4>💎 อัตราแต้มตามประเภทถัง</h4>
+                    <div class="point-info-grid">
+                        <div class="point-info-item">
+                            <span class="info-icon">🗑️</span>
+                            <span class="info-label">ถังทั่วไป</span>
+                            <span class="info-points">+10 แต้ม</span>
+                        </div>
+                        <div class="point-info-item">
+                            <span class="info-icon">♻️</span>
+                            <span class="info-label">ถังรีไซเคิล</span>
+                            <span class="info-points recycle">+20 แต้ม</span>
+                        </div>
+                        <div class="point-info-item">
+                            <span class="info-icon">☢️</span>
+                            <span class="info-label">ถังอันตราย</span>
+                            <span class="info-points hazard">+30 แต้ม</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- FAQ -->
+                <div class="faq-section">
+                    <h4>❓ คำถามที่พบบ่อย</h4>
+                    <div class="faq-list">
+                        <details class="faq-item">
+                            <summary>กล้องไม่เปิด ทำอย่างไร?</summary>
+                            <p>ตรวจสอบว่าได้อนุญาตการใช้กล้องในเบราว์เซอร์แล้ว หรือใช้ตัวเลือก "กรอกรหัสถังขยะ" แทน</p>
+                        </details>
+                        <details class="faq-item">
+                            <summary>แต้มนำไปใช้ทำอะไรได้บ้าง?</summary>
+                            <p>สามารถนำแต้มไปแลกของรางวัล เช่น คูปองส่วนลด บัตรกำนัล และอื่นๆ</p>
+                        </details>
+                        <details class="faq-item">
+                            <summary>ทำไมต้องทิ้งขยะถูกประเภท?</summary>
+                            <p>การแยกขยะช่วยให้รีไซเคิลได้ง่ายขึ้น ลดมลพิษ และรักษาสิ่งแวดล้อม</p>
+                        </details>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-section="home" id="navHome">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">หน้าแรก</span>
+            </button>
+            <button class="nav-item" data-section="scan" id="btnScanNav">
+                <span class="nav-icon scan-btn">📷</span>
+                <span class="nav-label">สแกน</span>
+            </button>
+            <button class="nav-item" data-section="guide" id="navGuide">
+                <span class="nav-icon">📖</span>
+                <span class="nav-label">คู่มือ</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- ============================================
+         MODALS
+         ============================================ -->
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content auth-modal">
+            <div class="modal-header">
+                <h2>🔐 เข้าสู่ระบบ</h2>
+                <button class="btn-close" id="btnCloseLogin">&times;</button>
+            </div>
+            <div class="auth-form">
+                <div class="form-group">
+                    <label>อีเมลหรือชื่อผู้ใช้</label>
+                    <input type="text" id="loginEmail" placeholder="example@email.com" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>รหัสผ่าน</label>
+                    <div class="password-input">
+                        <input type="password" id="loginPassword" placeholder="••••••••" class="form-input">
+                        <button type="button" class="toggle-password" id="toggleLoginPassword">👁️</button>
+                    </div>
+                </div>
+                <div class="form-error" id="loginError" style="display: none;"></div>
+                <button class="btn-primary btn-submit" id="btnLogin">เข้าสู่ระบบ</button>
+                
+                <div class="auth-links">
+                    <a href="#" id="linkForgotPassword">ลืมรหัสผ่าน?</a>
+                    <span class="divider">|</span>
+                    <a href="#" id="linkToRegister">สมัครสมาชิกใหม่</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content auth-modal register-modal">
+            <div class="modal-header">
+                <h2>📝 สมัครสมาชิก</h2>
+                <button class="btn-close" id="btnCloseRegister">&times;</button>
+            </div>
+            <div class="auth-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ชื่อผู้ใช้ <span class="required">*</span></label>
+                        <input type="text" id="regUsername" placeholder="username" class="form-input">
+                        <span class="input-hint">4-20 ตัวอักษร ภาษาอังกฤษและตัวเลข</span>
+                    </div>
+                    <div class="form-group">
+                        <label>อีเมล <span class="required">*</span></label>
+                        <input type="email" id="regEmail" placeholder="example@email.com" class="form-input">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ชื่อ-นามสกุล <span class="required">*</span></label>
+                    <input type="text" id="regFullName" placeholder="ชื่อจริง นามสกุล" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>รหัสผ่าน <span class="required">*</span></label>
+                    <div class="password-input">
+                        <input type="password" id="regPassword" placeholder="••••••••" class="form-input">
+                        <button type="button" class="toggle-password" id="toggleRegPassword">👁️</button>
+                    </div>
+                    <div class="password-strength" id="passwordStrength">
+                        <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                        <span class="strength-text" id="strengthText">ความแข็งแรงของรหัสผ่าน</span>
+                    </div>
+                    <ul class="password-rules">
+                        <li id="rule-length">อย่างน้อย 8 ตัวอักษร</li>
+                        <li id="rule-upper">มีตัวพิมพ์ใหญ่</li>
+                        <li id="rule-lower">มีตัวพิมพ์เล็ก</li>
+                        <li id="rule-number">มีตัวเลข</li>
+                        <li id="rule-special">มีอักขระพิเศษ (!@#$%^&*)</li>
+                    </ul>
+                </div>
+                <div class="form-group">
+                    <label>ยืนยันรหัสผ่าน <span class="required">*</span></label>
+                    <div class="password-input">
+                        <input type="password" id="regConfirmPassword" placeholder="••••••••" class="form-input">
+                        <button type="button" class="toggle-password" id="toggleRegConfirmPassword">👁️</button>
+                    </div>
+                </div>
+                
+                <!-- Terms & Conditions -->
+                <div class="terms-section">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="agreeTerms">
+                        <span class="checkmark"></span>
+                        <span>ข้าพเจ้ายอมรับ <a href="#" id="linkTerms">ข้อกำหนดและเงื่อนไข</a> และ <a href="#" id="linkPrivacy">นโยบายความเป็นส่วนตัว</a></span>
+                    </label>
+                </div>
+                
+                <div class="form-error" id="registerError" style="display: none;"></div>
+                <button class="btn-primary btn-submit" id="btnRegister" disabled>สมัครสมาชิก</button>
+                
+                <div class="auth-links">
+                    <span>มีบัญชีอยู่แล้ว?</span>
+                    <a href="#" id="linkToLogin">เข้าสู่ระบบ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms Modal -->
+    <div class="modal" id="termsModal">
+        <div class="modal-content terms-modal">
+            <div class="modal-header">
+                <h2>📜 ข้อกำหนดและเงื่อนไข</h2>
+                <button class="btn-close" id="btnCloseTerms">&times;</button>
+            </div>
+            <div class="terms-content">
+                <h3>1. การใช้งานทั่วไป</h3>
+                <p>ผู้ใช้ต้องมีอายุ 13 ปีขึ้นไปเพื่อสมัครใช้บริการ Scan to Earn การสมัครสมาชิกถือว่าผู้ใช้ยอมรับข้อกำหนดทั้งหมด</p>
+                
+                <h3>2. ข้อมูลส่วนบุคคล</h3>
+                <p>เราเก็บรวบรวมข้อมูลเท่าที่จำเป็นสำหรับการให้บริการ รวมถึง อีเมล ชื่อผู้ใช้ และประวัติการทำรายการ ข้อมูลจะถูกเก็บรักษาอย่างปลอดภัย</p>
+                
+                <h3>3. ความปลอดภัย</h3>
+                <ul>
+                    <li>รหัสผ่านของคุณจะถูกเข้ารหัสและไม่สามารถถูกอ่านได้</li>
+                    <li>ไม่ควรแชร์รหัสผ่านกับผู้อื่น</li>
+                    <li>ควรใช้รหัสผ่านที่แข็งแรง (ตัวพิมพ์ใหญ่ เล็ก ตัวเลข อักขระพิเศษ)</li>
+                    <li>หากสงสัยว่าบัญชีถูกเข้าถึงโดยไม่ได้รับอนุญาต กรุณาเปลี่ยนรหัสผ่านทันที</li>
+                </ul>
+                
+                <h3>4. ระบบแต้ม</h3>
+                <p>แต้มที่ได้รับจากการสแกน QR Code สามารถนำไปแลกของรางวัลได้ตามที่กำหนด แต้มไม่สามารถแลกเปลี่ยนเป็นเงินสดได้</p>
+                
+                <h3>5. การระงับบัญชี</h3>
+                <p>เราขอสงวนสิทธิ์ในการระงับบัญชีที่มีพฤติกรรมไม่เหมาะสม หรือละเมิดข้อกำหนด</p>
+            </div>
+            <button class="btn-primary" id="btnAcceptTerms">ยอมรับข้อกำหนด</button>
+        </div>
+    </div>
+
+    <!-- User Menu Dropdown -->
+    <div class="user-dropdown" id="userDropdown" style="display: none;">
+        <div class="dropdown-header">
+            <span class="dropdown-name" id="dropdownName">User</span>
+            <span class="dropdown-email" id="dropdownEmail">user@email.com</span>
+        </div>
+        <div class="dropdown-divider"></div>
+        <a href="#" class="dropdown-item" id="menuProfile">👤 โปรไฟล์</a>
+        <a href="#" class="dropdown-item" id="menuSettings">⚙️ ตั้งค่า</a>
+        <a href="admin.html" class="dropdown-item admin-only" id="menuAdmin" style="display: none;">🔧 Admin Panel</a>
+        <div class="dropdown-divider"></div>
+        <a href="#" class="dropdown-item logout" id="menuLogout">🚪 ออกจากระบบ</a>
+    </div>
+
+    <!-- Scanner Modal -->
+    <div class="modal" id="scannerModal">
+        <div class="modal-content scanner-modal">
+            <div class="modal-header">
+                <h2>📷 สแกน QR Code</h2>
+                <button class="btn-close" id="btnCloseScanner">&times;</button>
+            </div>
+            <div class="scanner-wrapper">
+                <div class="scanner-frame">
+                    <div class="scanner-corners">
+                        <div class="corner tl"></div>
+                        <div class="corner tr"></div>
+                        <div class="corner bl"></div>
+                        <div class="corner br"></div>
+                    </div>
+                    <div id="qrReader"></div>
+                    <div class="scanner-line"></div>
+                </div>
+                <p class="scanner-hint">หันกล้องไปที่ QR Code บนถังขยะ</p>
+                <p class="scanner-status" id="scannerStatus">กำลังเปิดกล้อง...</p>
+            </div>
+            
+            <!-- Manual Input (Fallback) -->
+            <div class="manual-input" id="manualInput" style="display: none;">
+                <p class="manual-label">📝 หรือเลือกประเภทถังขยะ:</p>
+                <div class="manual-form">
+                    <select id="manualBinType" class="manual-select">
+                        <option value="general">🗑️ ถังทั่วไป (+10)</option>
+                        <option value="recycle">♻️ รีไซเคิล (+20)</option>
+                        <option value="hazardous">☢️ อันตราย (+30)</option>
+                    </select>
+                    <button class="btn-manual-submit" id="btnManualSubmit">ยืนยัน</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content success-modal">
+            <div class="success-animation">
+                <div class="success-icon">✅</div>
+                <div class="confetti"></div>
+            </div>
+            <h2 class="success-title">สำเร็จ!</h2>
+            <p class="success-message" id="successMessage">+20 แต้ม</p>
+            <p class="success-type" id="successType">ประเภท: รีไซเคิล</p>
+            <div class="success-total">
+                <span>แต้มรวม:</span>
+                <span class="total-points" id="totalPoints">0</span>
+            </div>
+            <button class="btn-primary" id="btnCloseSuccess">เยี่ยมไปเลย! 🎉</button>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="supabase.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
