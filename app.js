@@ -661,20 +661,53 @@ function handleQRScan(qrData) {
     closeScanner();
     
     let binInfo = null;
+    let binCode = null;
+    
+    // Try to parse as JSON first
     try {
         const parsed = JSON.parse(qrData);
-        if (parsed.type && parsed.points) {
+        if (parsed.binCode && parsed.type) {
             binInfo = parsed;
+            binCode = parsed.binCode;
         }
     } catch (e) {
-        // Use default
+        // Not JSON - treat as plain bin code
+        binCode = qrData.trim().toUpperCase();
     }
     
+    // If not found via JSON, lookup in database
+    if (!binInfo && binCode) {
+        const binsData = localStorage.getItem('s2eBins');
+        const bins = binsData ? JSON.parse(binsData) : [];
+        const bin = bins.find(b => b.id === binCode);
+        
+        if (bin && bin.active !== false) {
+            const points = { general: 10, recycle: 20, hazardous: 30 }[bin.type] || 10;
+            binInfo = { 
+                binCode: bin.id, 
+                type: bin.type, 
+                points: points,
+                location: bin.location 
+            };
+        }
+    }
+    
+    // Still not found? Try to guess from code prefix
+    if (!binInfo && binCode && binCode.length >= 3) {
+        let type = 'general';
+        if (binCode.startsWith('REC')) type = 'recycle';
+        else if (binCode.startsWith('HAZ')) type = 'hazardous';
+        
+        const points = { general: 10, recycle: 20, hazardous: 30 }[type];
+        binInfo = { binCode, type, points };
+    }
+    
+    // Fallback to general
     if (!binInfo) {
         binInfo = { type: 'general', points: 10 };
     }
     
-    processTransaction(binInfo.type, binInfo.points);
+    processTransaction(binInfo.type, binInfo.points, binInfo.binCode);
 }
 
 // Bin lookup storage
